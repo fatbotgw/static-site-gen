@@ -2,10 +2,10 @@ from enum import Enum
 
 
 class TextType(Enum):
-    PLAIN_TEXT = "plain"    # normal text
-    BOLD_TEXT = "bold"      # bold text **asdf**
-    ITALIC_TEXT = "italic"  # italic text _asdf_
-    CODE_TEXT = "code"      # code 'asdf' <- this is backtick
+    PLAIN = "plain"         # normal text
+    BOLD = "bold"           # bold text **asdf**
+    ITALIC = "italic"       # italic text _asdf_
+    CODE = "code"           # code 'asdf' <- this is backtick
     LINK = "link"           # links [anchor text](url)
     IMAGE = "image"         # images ![alt text](url)
 
