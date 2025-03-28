@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -73,6 +73,30 @@ class TestHTMLNode(unittest.TestCase):
             node.__repr__(),
             "HTMLNode(p, What a strange world, None, {'class': 'primary'})",
         )
+
+    def test_leaf_to_html_p(self):
+        node = LeafNode("p", "Hello, world!")
+        self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
+
+    def test_leaf_to_html_a(self):
+        node = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
+        self.assertEqual(node.to_html(), '<a href="https://www.google.com">Click me!</a>')
+
+    def test_leaf_to_html_no_tag(self):
+        node = LeafNode(None, "Hello, world!")
+        self.assertEqual(node.to_html(), "Hello, world!")
+
+    def test_leaf_to_html_a_mult(self):
+        node = LeafNode("a", "Link me!", {"href": "https://boot.dev", "target": "_blank"})
+        self.assertEqual(node.to_html(), '<a href="https://boot.dev" target="_blank">Link me!</a>')
+
+    def test_leaf_to_html_error(self):
+        with self.assertRaises(ValueError):
+            LeafNode("div", None).to_html()
+
+    def test_leaf_to_html_specials(self):
+        node = LeafNode("p", "    Indented text    ")
+        self.assertEqual(node.to_html(), "<p>    Indented text    </p>")
 
 if __name__ == "__main__":
     unittest.main()
