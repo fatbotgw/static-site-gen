@@ -1,6 +1,6 @@
 import unittest
 
-from converters import text_node_to_html_node
+from converters import split_nodes_delimiter, text_node_to_html_node
 from textnode import TextNode, TextType
 
 
@@ -59,6 +59,42 @@ class TestConverters(unittest.TestCase):
             '<img src="https://example.com/bear.png" alt="A majestic bear wizard" />',
         )
 
+    def test_split_backtick(self):
+        node = TextNode("This is a `code block` example.", TextType.PLAIN)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        assert new_nodes == [
+            TextNode("This is a ", TextType.PLAIN),
+            TextNode("code block", TextType.CODE),
+            TextNode(" example.", TextType.PLAIN)
+        ]
+    def test_split_bold(self):
+        node = TextNode("This is a **bold** example.", TextType.PLAIN)
+        new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
+        assert new_nodes == [
+            TextNode("This is a ", TextType.PLAIN),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" example.", TextType.PLAIN)
+        ]
+    def test_split_italic(self):
+        node = TextNode("This is an _italic_ example.", TextType.PLAIN)
+        new_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
+        assert new_nodes == [
+            TextNode("This is an ", TextType.PLAIN),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" example.", TextType.PLAIN)
+        ]
+
+    def test_split_mismatch_delim(self):
+        node = TextNode("This is an _italic example.", TextType.PLAIN)
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter([node], "_", TextType.ITALIC)
+
+    def test_split_plain(self):
+        node = TextNode("This is a plain text example.", TextType.PLAIN)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        assert new_nodes == [
+            TextNode("This is a plain text example.", TextType.PLAIN),
+        ]
 
 if __name__ == "__main__":
     unittest.main()
