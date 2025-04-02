@@ -1,6 +1,10 @@
 import unittest
 
-from converters import split_nodes_delimiter, text_node_to_html_node
+from converters import (
+    split_nodes_delimiter,
+    text_node_to_html_node,
+    extract_markdown_images,
+)
 from textnode import TextNode, TextType
 
 
@@ -65,23 +69,25 @@ class TestConverters(unittest.TestCase):
         assert new_nodes == [
             TextNode("This is a ", TextType.PLAIN),
             TextNode("code block", TextType.CODE),
-            TextNode(" example.", TextType.PLAIN)
+            TextNode(" example.", TextType.PLAIN),
         ]
+
     def test_split_bold(self):
         node = TextNode("This is a **bold** example.", TextType.PLAIN)
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
         assert new_nodes == [
             TextNode("This is a ", TextType.PLAIN),
             TextNode("bold", TextType.BOLD),
-            TextNode(" example.", TextType.PLAIN)
+            TextNode(" example.", TextType.PLAIN),
         ]
+
     def test_split_italic(self):
         node = TextNode("This is an _italic_ example.", TextType.PLAIN)
         new_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
         assert new_nodes == [
             TextNode("This is an ", TextType.PLAIN),
             TextNode("italic", TextType.ITALIC),
-            TextNode(" example.", TextType.PLAIN)
+            TextNode(" example.", TextType.PLAIN),
         ]
 
     def test_split_mismatch_delim(self):
@@ -95,6 +101,21 @@ class TestConverters(unittest.TestCase):
         assert new_nodes == [
             TextNode("This is a plain text example.", TextType.PLAIN),
         ]
+
+    def test_extract_markdown_image(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_extract_markdown_images(self):
+        text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        new_list = extract_markdown_images(text)
+        assert new_list == [
+            ("rick roll", "https://i.imgur.com/aKaOqIh.gif"),
+            ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg"),
+        ]
+
 
 if __name__ == "__main__":
     unittest.main()

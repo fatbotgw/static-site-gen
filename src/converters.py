@@ -1,5 +1,7 @@
-from textnode import TextNode, TextType
+import re
+
 from htmlnode import LeafNode
+from textnode import TextNode, TextType
 
 
 def text_node_to_html_node(text_node):
@@ -42,4 +44,18 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             inside_delimiter = not inside_delimiter
 
     return node_list
+
+def extract_markdown_images(text):
+    image_list = []
+
+    alt_text = re.findall(r"\[(.*?)\]", text)
+    url = re.findall(r"\((.*?)\)", text)
+
+    for i in range(len(url)):
+        image_list.append((alt_text[i], url[i]))
+        i += 1
+
+    return image_list
+
+
 
