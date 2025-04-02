@@ -117,12 +117,26 @@ class TestConverters(unittest.TestCase):
             ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg"),
         ]
 
+    def test_extract_markdown_image_and_link(self):
+        text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and [obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        new_list = extract_markdown_images(text)
+        assert new_list == [
+            ("rick roll", "https://i.imgur.com/aKaOqIh.gif"),
+        ]
+
     def test_extract_markdown_links(self):
         text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
         new_list = extract_markdown_links(text)
         assert new_list == [
             ("to boot dev", "https://www.boot.dev"),
             ("to youtube", "https://www.youtube.com/@bootdotdev"),
+        ]
+
+    def test_extract_markdown_link_and_image(self):
+        text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and [obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        new_list = extract_markdown_links(text)
+        assert new_list == [
+            ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg"),
         ]
 
 
