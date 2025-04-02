@@ -58,4 +58,16 @@ def extract_markdown_images(text):
     return image_list
 
 
+def extract_markdown_links(text):
+    image_list = []
+
+    alt_text = re.findall(r"\[(.*?)\]", text)
+    url = re.findall(r"\((.*?)\)", text)
+
+    for i in range(len(url)):
+        image_list.append((alt_text[i], url[i]))
+        i += 1
+
+    return image_list
+
 

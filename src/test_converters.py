@@ -4,6 +4,7 @@ from converters import (
     split_nodes_delimiter,
     text_node_to_html_node,
     extract_markdown_images,
+    extract_markdown_links,
 )
 from textnode import TextNode, TextType
 
@@ -114,6 +115,14 @@ class TestConverters(unittest.TestCase):
         assert new_list == [
             ("rick roll", "https://i.imgur.com/aKaOqIh.gif"),
             ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg"),
+        ]
+
+    def test_extract_markdown_links(self):
+        text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        new_list = extract_markdown_links(text)
+        assert new_list == [
+            ("to boot dev", "https://www.boot.dev"),
+            ("to youtube", "https://www.youtube.com/@bootdotdev"),
         ]
 
 
