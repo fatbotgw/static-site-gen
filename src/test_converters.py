@@ -215,5 +215,101 @@ class TestConverters(unittest.TestCase):
             new_nodes,
         )
 
+    def test_split_images_no_images(self):
+        node = TextNode("This is plain text with no images.", TextType.PLAIN)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([node], new_nodes)
+
+    def test_split_links_no_links(self):
+        node = TextNode("This is plain text with no links.", TextType.PLAIN)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual([node], new_nodes)
+
+    def test_split_images_starts_with_image(self):
+        node = TextNode("![First image](https://example.com/img.png) followed by text", TextType.PLAIN)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([
+            TextNode("First image", TextType.IMAGE, "https://example.com/img.png"),
+            TextNode(" followed by text", TextType.PLAIN)
+        ], new_nodes)
+
+    def test_split_links_starts_with_link(self):
+        node = TextNode("[First link](https://example.com) followed by text", TextType.PLAIN)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual([
+            TextNode("First link", TextType.LINK, "https://example.com"),
+            TextNode(" followed by text", TextType.PLAIN)
+        ], new_nodes)
+
+    def test_split_images_consecutive(self):
+        node = TextNode("![First](https://example.com/1.png)![Second](https://example.com/2.png)", TextType.PLAIN)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([
+            TextNode("First", TextType.IMAGE, "https://example.com/1.png"),
+            TextNode("Second", TextType.IMAGE, "https://example.com/2.png")
+        ], new_nodes)
+
+    def test_split_links_consecutive(self):
+        node = TextNode("[First](https://example.com/1)[Second](https://example.com/2)", TextType.PLAIN)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual([
+            TextNode("First", TextType.LINK, "https://example.com/1"),
+            TextNode("Second", TextType.LINK, "https://example.com/2")
+        ], new_nodes)
+
+    def test_split_images_empty_alt_text(self):
+        node = TextNode("An image with no alt text: ![](https://example.com/img.png)", TextType.PLAIN)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([
+            TextNode("An image with no alt text: ", TextType.PLAIN),
+            # No image node because the alt text is empty
+        ], new_nodes)
+
+    def test_split_links_empty_text(self):
+        node = TextNode("A link with no text: [](https://example.com)", TextType.PLAIN)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual([
+            TextNode("A link with no text: ", TextType.PLAIN),
+            # No link node because the link text is empty
+        ], new_nodes)
+
+    def test_split_images_special_characters(self):
+        node = TextNode("Special chars: ![Alt with *special* chars](https://example.com/img.png?q=1&b=2)", TextType.PLAIN)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([
+            TextNode("Special chars: ", TextType.PLAIN),
+            TextNode("Alt with *special* chars", TextType.IMAGE, "https://example.com/img.png?q=1&b=2")
+        ], new_nodes)
+
+    def test_split_links_special_characters(self):
+        node = TextNode("Special chars: [Text with *special* chars](https://example.com?q=1&b=2)", TextType.PLAIN)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual([
+            TextNode("Special chars: ", TextType.PLAIN),
+            TextNode("Text with *special* chars", TextType.LINK, "https://example.com?q=1&b=2")
+        ], new_nodes)
+
+    def test_split_images_confusing_patterns(self):
+        # Test with a valid image and some incomplete markdown patterns that won't match
+        node = TextNode("Text with ![valid image](https://example.com/img.png) and ![incomplete image(url missing) and ![nourl]", TextType.PLAIN)
+        new_nodes = split_nodes_image([node])
+        # Only the valid image with proper URL should be extracted
+        self.assertListEqual([
+            TextNode("Text with ", TextType.PLAIN),
+            TextNode("valid image", TextType.IMAGE, "https://example.com/img.png"),
+            TextNode(" and ![incomplete image(url missing) and ![nourl]", TextType.PLAIN)
+        ], new_nodes)
+
+    def test_split_links_confusing_patterns(self):
+        # Test with a valid link and some incomplete markdown patterns that won't match
+        node = TextNode("Text with [valid link](https://example.com) and [incomplete link(url missing) and [nourl]", TextType.PLAIN)
+        new_nodes = split_nodes_link([node])
+        # Only the valid link with proper URL should be extracted
+        self.assertListEqual([
+            TextNode("Text with ", TextType.PLAIN),
+            TextNode("valid link", TextType.LINK, "https://example.com"),
+            TextNode(" and [incomplete link(url missing) and [nourl]", TextType.PLAIN)
+        ], new_nodes)
+
 if __name__ == "__main__":
     unittest.main()

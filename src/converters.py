@@ -76,8 +76,9 @@ def split_nodes_image(old_nodes):
             if parts[0]:
                 node_list.append(TextNode(parts[0], TextType.PLAIN))
                 
-            # Add a node for the image itself
-            node_list.append(TextNode(alt_text, TextType.IMAGE, url))
+            if alt_text:
+                # Add a node for the image itself
+                node_list.append(TextNode(alt_text, TextType.IMAGE, url))
             
             # The remaining text becomes what's after the image
             if len(parts) > 1:
@@ -109,8 +110,10 @@ def split_nodes_link(old_nodes):
             if parts[0]:
                 node_list.append(TextNode(parts[0], TextType.PLAIN))
                 
-            # Add a node for the image itself
-            node_list.append(TextNode(alt_text, TextType.LINK, url))
+
+            if alt_text:
+                # Add a node for the image itself
+                node_list.append(TextNode(alt_text, TextType.LINK, url))
             
             # The remaining text becomes what's after the image
             if len(parts) > 1:
