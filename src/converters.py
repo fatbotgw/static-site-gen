@@ -2,7 +2,6 @@ import re
 
 from htmlnode import LeafNode
 from textnode import TextNode, TextType
-import textnode
 
 
 def text_node_to_html_node(text_node):
@@ -126,3 +125,15 @@ def split_nodes_link(old_nodes):
 
     return node_list
 
+
+def text_to_textnodes(text):
+    new_node = TextNode(text, TextType.PLAIN)
+    node_list = [new_node]
+
+    node_list = split_nodes_image(node_list)
+    node_list = split_nodes_link(node_list)
+    node_list = split_nodes_delimiter(node_list, "**", TextType.BOLD)
+    node_list = split_nodes_delimiter(node_list, "_", TextType.ITALIC)
+    node_list = split_nodes_delimiter(node_list, "`", TextType.CODE)
+
+    return node_list
