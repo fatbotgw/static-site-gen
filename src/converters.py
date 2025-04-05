@@ -137,3 +137,24 @@ def text_to_textnodes(text):
     node_list = split_nodes_delimiter(node_list, "`", TextType.CODE)
 
     return node_list
+
+def markdown_to_blocks(markdown):
+    new_list = markdown.split("\n\n")
+    out_list = []
+    
+    for item in new_list:
+        # Strip leading/trailing whitespace
+        stripped_item = item.strip()
+        # Skip now empty items
+        if not stripped_item:
+            continue
+        
+        # Split the block into lines, strip each line, then rejoin
+        lines = stripped_item.split("\n")
+        lines_out = []
+        for line in lines:
+            lines_out.append(line.strip())
+        
+        out_list.append("\n".join(lines_out))
+
+    return out_list
