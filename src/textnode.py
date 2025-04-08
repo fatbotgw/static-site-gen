@@ -5,7 +5,7 @@ class TextType(Enum):
     PLAIN = "plain"         # normal text
     BOLD = "bold"           # bold text **asdf**
     ITALIC = "italic"       # italic text _asdf_
-    CODE = "code"           # code 'asdf' <- this is backtick
+    CODE = "code"           # code `asdf` <- this is backtick
     LINK = "link"           # links [anchor text](url)
     IMAGE = "image"         # images ![alt text](url)
 

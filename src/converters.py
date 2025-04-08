@@ -1,7 +1,9 @@
 import re
 
-from htmlnode import LeafNode
+from htmlnode import LeafNode, HTMLNode, ParentNode
+import htmlnode
 from textnode import TextNode, TextType
+from block_type import BlockType, block_to_block_type
 
 
 def text_node_to_html_node(text_node):
@@ -33,7 +35,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
         parts = node.text.split(delimiter)
         if len(parts) % 2 == 0:
-            raise ValueError(f"Unclose delimiter '{delimiter}' in text: {node.text}")
+            raise ValueError(f"Unclosed delimiter '{delimiter}' in text: {node.text}")
 
         inside_delimiter = False
         for part in parts:
@@ -138,6 +140,10 @@ def text_to_textnodes(text):
 
     return node_list
 
+# This is my version, written based on the unit test provided in the assignment
+# which seems to have had extra indenting in the markdown.  This is why there
+# is an extra for loop and adittional split/join that removes the extra indents
+#
 def markdown_to_blocks(markdown):
     new_list = markdown.split("\n\n")
     out_list = []
@@ -158,3 +164,70 @@ def markdown_to_blocks(markdown):
         out_list.append("\n".join(lines_out))
 
     return out_list
+
+# This version is from the assignment solution, but won't work if the markdown
+# has extra indentions in the unit test, see test_converters.py for examples
+#
+# def markdown_to_blocks(markdown):
+#     blocks = markdown.split("\n\n")
+#     filtered_blocks = []
+#     for block in blocks:
+#         if block == "":
+#             continue
+#         block = block.strip()
+#         filtered_blocks.append(block)
+#     return filtered_blocks
+
+def block_to_html(node_list, block_type):
+    html_node_list = []
+    for node in node_list:
+        html_node_list.append(text_node_to_html_node(node))
+
+    # block_type_to_tag = {
+    #     BlockType.PARAGRAPH: "p",
+    #     BlockType.QUOTE: "blockquote",
+    #     BlockType.CODE: "pre",
+    #     BlockType.HEADING: "h",
+    #     BlockType.UNORDERED_LIST: "ul",
+    #     BlockType.ORDERED_LIST: "ol"
+    # }
+
+    if block_type is BlockType.PARAGRAPH:
+        return ParentNode("p", html_node_list)
+    elif block_type is BlockType.CODE:
+        return ParentNode("pre", html_node_list)
+    elif block_type is BlockType.QUOTE:
+        return ParentNode("blockquote", html_node_list)
+    elif block_type is BlockType.HEADING:
+        pass
+    elif block_type is BlockType.UNORDERED_LIST:
+        pass
+    elif block_type is BlockType.ORDERED_LIST:
+        pass
+    else:
+        raise Exception(f"Unsupported block type: {block_type}")
+
+
+def markdown_to_html_node(markdown):
+    block_list = markdown_to_blocks(markdown)
+    html_node_list = []
+
+    for block in block_list:
+        block_type = block_to_block_type(block)
+        if block_type is BlockType.CODE:
+            block_content = block[3:-3].lstrip("\n")
+            new_node = TextNode(block_content, TextType.CODE)
+            html_node = block_to_html([new_node], block_type)
+        else:
+            block = block.replace("\n", " ")
+
+            if block_type is BlockType.QUOTE:
+                block = block.replace("> ", "")
+            # print(f"\n***block:\n{block} \n***type: {block_type}")
+            html_node = block_to_html(text_to_textnodes(block), block_type)
+            
+        html_node_list.append(html_node)
+    
+    html_node = ParentNode("div", html_node_list)
+    # print(f"\n***return value:\n{html_node.to_html()}")
+    return html_node
