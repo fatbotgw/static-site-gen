@@ -12,3 +12,6 @@ venv.bak/
 
 # MacOS
 .DS_Store
+
+# This project
+public/

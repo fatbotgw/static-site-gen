@@ -1,32 +1,36 @@
-from textnode import TextType, TextNode
-from htmlnode import HTMLNode, LeafNode, ParentNode
-from converters import (
-    text_node_to_html_node,
-    split_nodes_delimiter,
-    extract_markdown_images,
-    extract_markdown_links,
-)
+from shutil import copy, rmtree
+from os import mkdir, listdir
+from os.path import isfile, isdir, join, abspath
+
+
+def copy_static_to_public(source=None, destination=None):
+    if source is None:
+        source = abspath("static")
+        destination = abspath("public")
+
+    # delete everything in public
+        print("deleting public/")
+        rmtree("public/", ignore_errors=True)
+        print("creating public/")
+        mkdir("public")
+
+    # copy everything from static to public
+    dir_tree = listdir(source)
+    for item in dir_tree:
+        if item == ".DS_Store":
+            continue
+        if not isfile(join(source, item)):
+            mkdir(join(destination, item))
+            copy_static_to_public(join(source, item), join(destination, item))
+
+        if isfile(join(source, item)):
+            copy(join(source, item), join(destination, item))
+
+    return
 
 
 def main():
-    # text = "This is some text"
-    # text_type = TextType.LINK
-    # url = "https://www.boot.dev"
-    # test_node = TextNode(text, text_type, url)
-    # print(test_node)
-
-    # node = TextNode("This is text with a `code block` word", TextType.PLAIN)
-    # new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
-    # print(new_nodes)
-
-    text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
-    print(extract_markdown_images(text))
-    # [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
-
-    text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
-    print(extract_markdown_links(text))
-    # [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
-
+    copy_static_to_public()
 
 if __name__ == "__main__":
     main()
