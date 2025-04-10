@@ -24,7 +24,7 @@ def block_to_block_type(markdown):
                 return BlockType.PARAGRAPH
         return BlockType.QUOTE
 
-    if markdown.startswith("- "):
+    if markdown.startswith("- ") or markdown.startswith("*"):
         for line in lines:
             if not line.startswith("- "):
                 return BlockType.PARAGRAPH

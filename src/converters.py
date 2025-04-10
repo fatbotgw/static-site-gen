@@ -180,30 +180,67 @@ def markdown_to_blocks(markdown):
 
 def block_to_html(node_list, block_type):
     html_node_list = []
-    for node in node_list:
-        html_node_list.append(text_node_to_html_node(node))
-
-    # block_type_to_tag = {
-    #     BlockType.PARAGRAPH: "p",
-    #     BlockType.QUOTE: "blockquote",
-    #     BlockType.CODE: "pre",
-    #     BlockType.HEADING: "h",
-    #     BlockType.UNORDERED_LIST: "ul",
-    #     BlockType.ORDERED_LIST: "ol"
-    # }
+    if block_type is not BlockType.UNORDERED_LIST and block_type is not BlockType.ORDERED_LIST:
+        for node in node_list:
+            html_node_list.append(text_node_to_html_node(node))
 
     if block_type is BlockType.PARAGRAPH:
         return ParentNode("p", html_node_list)
+
     elif block_type is BlockType.CODE:
         return ParentNode("pre", html_node_list)
+
     elif block_type is BlockType.QUOTE:
         return ParentNode("blockquote", html_node_list)
+
     elif block_type is BlockType.HEADING:
-        pass
+        h_level = 0
+        html_node_list = []
+        for node in node_list:
+            for char in node.text:
+                if char == "#":
+                    h_level += 1
+                else:
+                    break
+            node.text = node.text[h_level + 1 :]
+            html_node_list.append(text_node_to_html_node(node))
+        return ParentNode(f"h{h_level}", html_node_list)
+
     elif block_type is BlockType.UNORDERED_LIST:
-        pass
+        items = node_list.split("\n")  # Split into individual list items
+
+        for item in items:
+            item = item.lstrip("- ")  # Strip the "- " marker
+            text_nodes = text_to_textnodes(item)  # Parse markdown in the item
+
+            # Convert all TextNodes into HTMLNodes
+            html_children = []
+            for node in text_nodes:
+                html_children.append(text_node_to_html_node(node))
+
+            # Wrap all children in one ParentNode representing the <li>
+            html_node_list.append(ParentNode("li", html_children))
+
+        return ParentNode("ul", html_node_list)
+
+
     elif block_type is BlockType.ORDERED_LIST:
-        pass
+        items = node_list.split("\n")  # Split into individual list items
+
+        for item in items:
+            item = item.lstrip("0123456789. ")  # Strip the leading "1. ", "2. ", etc.
+            text_nodes = text_to_textnodes(item)  # Parse markdown in the item
+
+            # Convert all TextNodes into HTMLNodes
+            html_children = []
+            for node in text_nodes:
+                html_children.append(text_node_to_html_node(node))
+
+            # Wrap all children in one ParentNode representing the <li>
+            html_node_list.append(ParentNode("li", html_children))
+
+        return ParentNode("ol", html_node_list)
+
     else:
         raise Exception(f"Unsupported block type: {block_type}")
 
@@ -218,16 +255,21 @@ def markdown_to_html_node(markdown):
             block_content = block[3:-3].lstrip("\n")
             new_node = TextNode(block_content, TextType.CODE)
             html_node = block_to_html([new_node], block_type)
+
+        elif block_type is BlockType.UNORDERED_LIST or block_type is BlockType.ORDERED_LIST:
+            html_node = block_to_html(block, block_type)
+
         else:
             block = block.replace("\n", " ")
 
             if block_type is BlockType.QUOTE:
                 block = block.replace("> ", "")
+            
             # print(f"\n***block:\n{block} \n***type: {block_type}")
             html_node = block_to_html(text_to_textnodes(block), block_type)
             
         html_node_list.append(html_node)
     
-    html_node = ParentNode("div", html_node_list)
+    # html_node = ParentNode("div", html_node_list)
     # print(f"\n***return value:\n{html_node.to_html()}")
-    return html_node
+    return ParentNode("div", html_node_list)
