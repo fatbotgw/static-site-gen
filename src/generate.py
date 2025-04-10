@@ -29,9 +29,12 @@ def copy_static_to_public(source=None, destination=None):
 
 
 def extract_title(markdown):
-    pass
-
+    lines = markdown.split("\n")
+    for line in lines:
+        if markdown.startswith("# "):
+            return line[2:].strip()
+    raise Exception("No header found in text")
 
 
 def generate_page(from_path, template_path, dest_path):
-    pass
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
