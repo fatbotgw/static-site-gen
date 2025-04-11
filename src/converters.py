@@ -39,10 +39,11 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
         inside_delimiter = False
         for part in parts:
-            if inside_delimiter:
-                node_list.append(TextNode(part, text_type))
-            else:
-                node_list.append(TextNode(part, TextType.PLAIN))
+            if part:
+                if inside_delimiter:
+                    node_list.append(TextNode(part, text_type))
+                else:
+                    node_list.append(TextNode(part, TextType.PLAIN))
             inside_delimiter = not inside_delimiter
 
     return node_list
@@ -128,6 +129,9 @@ def split_nodes_link(old_nodes):
 
 
 def text_to_textnodes(text):
+    if not text:
+        print("Warning: Empty text passed to text_to_textnodes")
+        print(f"***text:{text}")
     new_node = TextNode(text, TextType.PLAIN)
     node_list = [new_node]
 
