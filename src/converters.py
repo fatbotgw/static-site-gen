@@ -111,10 +111,9 @@ def split_nodes_link(old_nodes):
             if parts[0]:
                 node_list.append(TextNode(parts[0], TextType.PLAIN))
                 
-
             if alt_text:
                 # Add a node for the image itself
-                node_list.append(TextNode(alt_text, TextType.LINK, url))
+                node_list.append(TextNode(alt_text, TextType.LINK, {"href": url}))
             
             # The remaining text becomes what's after the image
             if len(parts) > 1:
@@ -265,11 +264,8 @@ def markdown_to_html_node(markdown):
             if block_type is BlockType.QUOTE:
                 block = block.replace("> ", "")
             
-            # print(f"\n***block:\n{block} \n***type: {block_type}")
             html_node = block_to_html(text_to_textnodes(block), block_type)
             
         html_node_list.append(html_node)
     
-    # html_node = ParentNode("div", html_node_list)
-    # print(f"\n***return value:\n{html_node.to_html()}")
     return ParentNode("div", html_node_list)
