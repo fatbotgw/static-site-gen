@@ -1,20 +1,20 @@
 from shutil import copy, rmtree
 from os import makedirs, mkdir, listdir
-from os.path import dirname, isfile, isdir, join, abspath, exists
+from os.path import dirname, isfile, join, abspath, exists
 from converters import markdown_to_html_node
 
 def copy_static_to_public(source=None, destination=None):
     if source is None:
         source = abspath("static")
-        destination = abspath("public")
+        destination = abspath("docs")
 
-    # delete everything in public
-        print("deleting public/")
-        rmtree("public/", ignore_errors=True)
-        print("creating public/")
-        mkdir("public")
+    # delete everything in docs
+        print("deleting docs/")
+        rmtree("docs/", ignore_errors=True)
+        print("creating docs/")
+        mkdir("docs")
 
-    # copy everything from static to public
+    # copy everything from static to docs
     dir_tree = listdir(source)
     for item in dir_tree:
         if item == ".DS_Store":
@@ -37,7 +37,7 @@ def extract_title(markdown):
     raise Exception("No header found in text")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     src_doc = ""    # This is the markdown text document
@@ -53,6 +53,8 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(src_doc)
 
     out_doc = template.replace("{{ Title }}", title).replace("{{ Content }}", html_out.to_html())
+    out_doc = out_doc.replace('href="/', f'href="{base_path}')
+    out_doc = out_doc.replace('src="/', f'src="{base_path}')
         
     if not exists(dirname(dest_path)):
         print(f"'{dirname(dest_path)}' does not exist...creating path...")
@@ -61,7 +63,8 @@ def generate_page(from_path, template_path, dest_path):
         file.write(out_doc)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, base_path):
+    print(f"dir_path:{dir_path_content}")
     dir_tree = listdir(dir_path_content)
 
     for item in dir_tree:
@@ -75,12 +78,11 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             new_dest = join(dest_dir_path, item)
             
             mkdir(new_dest)
-            generate_pages_recursive(item_path, template, new_dest)
+            generate_pages_recursive(item_path, template, new_dest, base_path)
 
         if isfile(item_path):
             file_name = item.split(".")[0] + ".html"
             dest_path = join(dest_dir_path, file_name)
             
-            # print(f"f:{item_path}, t:{template_path}, d:{dest_path}")
-            generate_page(item_path, template_path, dest_path)
+            generate_page(item_path, template_path, dest_path, base_path)
 
